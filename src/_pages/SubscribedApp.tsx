@@ -134,6 +134,7 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
     return () => cleanupFunctions.forEach((fn) => fn())
   }, [view])
 
+  
   return (
     <div ref={containerRef} className="min-h-0">
       {view === "queue" ? (

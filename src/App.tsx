@@ -39,7 +39,7 @@ function App() {
     description: "",
     variant: "neutral" as const
   })
-  const [credits, setCredits] = useState<number>(999) // Unlimited credits
+  const [credits, setCredits] = useState<number>(0) // Unlimited credits
   const [currentLanguage, setCurrentLanguage] = useState<string>("python")
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasApiKey, setHasApiKey] = useState(false)
@@ -50,8 +50,8 @@ function App() {
 
   // Set unlimited credits
   const updateCredits = useCallback(() => {
-    setCredits(999) // No credit limit in this version
-    window.__CREDITS__ = 999
+    // setCredits(999) // No credit limit in this version
+    // window.__CREDITS__ = 999
   }, [])
 
   // Helper function to safely update language
@@ -242,7 +242,7 @@ function App() {
         <ToastContext.Provider value={{ showToast }}>
           <div className="relative">
             {isInitialized ? (
-              hasApiKey ? (
+              hasApiKey ? ( 
                 <SubscribedApp
                   credits={credits}
                   currentLanguage={currentLanguage}

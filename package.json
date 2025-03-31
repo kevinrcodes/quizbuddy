@@ -109,7 +109,13 @@
       "main": "dist-electron/main.js"
     }
   },
-  "keywords": ["interview", "coding", "interview prep", "technical interview", "tool"],
+  "keywords": [
+    "interview",
+    "coding",
+    "interview prep",
+    "technical interview",
+    "tool"
+  ],
   "author": "Interview Coder Contributors",
   "license": "AGPL-3.0-or-later",
   "description": "An invisible desktop application to help you pass your technical interviews.",
@@ -121,6 +127,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
+    "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.64.0",
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.1",
