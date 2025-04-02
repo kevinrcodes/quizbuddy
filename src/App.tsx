@@ -15,6 +15,7 @@ import {
 import { ToastContext } from "./contexts/toast"
 import { WelcomeScreen } from "./components/WelcomeScreen"
 import { SettingsDialog } from "./components/Settings/SettingsDialog"
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 // Create a React Query client
 const queryClient = new QueryClient({
@@ -47,6 +48,11 @@ function App() {
   // Note: Model selection is now handled via separate extraction/solution/debugging model settings
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+
+  // track state of login screen because we show welcome screen first
+  const [showLogin, setShowLogin] = useState(false);
+  // use the authcontext to globally manage state
+  const { user, loading } = useAuth();
 
   // Set unlimited credits
   const updateCredits = useCallback(() => {
@@ -105,6 +111,15 @@ function App() {
       checkApiKey()
     }
   }, [isInitialized])
+
+
+  // TODO test that auth is working
+  useEffect(() => {
+    console.log("testing auth");
+    window.electronAPI.getCurrentUser().then(console.log)
+  }, [])
+
+
 
   // Initialize dropdown handler
   useEffect(() => {
@@ -237,55 +252,80 @@ function App() {
   }, [showToast])
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <ToastContext.Provider value={{ showToast }}>
-          <div className="relative">
-            {isInitialized ? (
-              hasApiKey ? ( 
-                <SubscribedApp
-                  credits={credits}
-                  currentLanguage={currentLanguage}
-                  setLanguage={updateLanguage}
-                />
+
+
+    <AuthProvider>
+
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <ToastContext.Provider value={{ showToast }}>
+            <div className="relative">
+              {isInitialized ? ( // TODO make and integrate login form
+                hasApiKey ? ( 
+                  <SubscribedApp
+                    credits={credits}
+                    currentLanguage={currentLanguage}
+                    setLanguage={updateLanguage}
+                  />
+                ) : (
+                  <WelcomeScreen onLoginClick={setShow} />
+                )
               ) : (
-                <WelcomeScreen onOpenSettings={handleOpenSettings} />
-              )
-            ) : (
-              <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin"></div>
-                  <p className="text-white/60 text-sm">
-                    Initializing...
-                  </p>
+                <div className="min-h-screen bg-black flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin"></div>
+                    <p className="text-white/60 text-sm">
+                      Initializing...
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
-            <UpdateNotification />
-          </div>
-          
-          {/* Settings Dialog */}
-          <SettingsDialog 
-            open={isSettingsOpen} 
-            onOpenChange={handleCloseSettings} 
-          />
-          
-          <Toast
-            open={toastState.open}
-            onOpenChange={(open) =>
-              setToastState((prev) => ({ ...prev, open }))
-            }
-            variant={toastState.variant}
-            duration={1500}
-          >
-            <ToastTitle>{toastState.title}</ToastTitle>
-            <ToastDescription>{toastState.description}</ToastDescription>
-          </Toast>
-          <ToastViewport />
-        </ToastContext.Provider>
-      </ToastProvider>
-    </QueryClientProvider>
+              )}
+
+
+            <div className="absolute top-4 right-4 bg-black text-white p-4 rounded">
+              <button
+                onClick={async () => {
+                  // TODO add an example user in supabase dashboard, then test this code
+                  const result = await window.electronAPI.signInWithEmail(
+                    "test@example.com",
+                    "password"
+                  );
+                  console.log("Sign in result:", result);
+                }}
+                className="bg-white text-black px-3 py-2 rounded"
+              >
+                Test Sign In
+              </button>
+            </div>
+
+              <UpdateNotification />
+            </div>
+            
+            {/* Settings Dialog */}
+            <SettingsDialog 
+              open={isSettingsOpen} 
+              onOpenChange={handleCloseSettings} 
+            />
+            
+            <Toast
+              open={toastState.open}
+              onOpenChange={(open) =>
+                setToastState((prev) => ({ ...prev, open }))
+              }
+              variant={toastState.variant}
+              duration={1500}
+            >
+              <ToastTitle>{toastState.title}</ToastTitle>
+              <ToastDescription>{toastState.description}</ToastDescription>
+            </Toast>
+            <ToastViewport />
+          </ToastContext.Provider>
+        </ToastProvider>
+      </QueryClientProvider>
+
+    </AuthProvider>
   )
+
 }
 
 export default App

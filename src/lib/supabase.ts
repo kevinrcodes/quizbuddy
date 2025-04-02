@@ -1,40 +1,7 @@
-// This file has been emptied to remove Supabase dependencies.
-// The open-source version uses local configuration instead.
+// src/lib/supabase.ts
+import { createClient } from "@supabase/supabase-js";
 
-// Export empty objects to prevent import errors in case any components still reference this file
-export const supabase = {
-  auth: {
-    getUser: async () => ({ data: { user: null } }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signOut: async () => ({ error: null }),
-    exchangeCodeForSession: async () => ({ error: null }),
-    signInWithOAuth: async () => ({ data: null, error: null })
-  },
-  from: () => ({
-    select: () => ({
-      eq: () => ({
-        single: async () => null,
-        maybeSingle: async () => null
-      })
-    }),
-    update: () => ({
-      eq: () => ({
-        select: () => ({
-          single: async () => null
-        })
-      })
-    })
-  }),
-  channel: () => ({
-    on: () => ({
-      subscribe: () => ({
-        unsubscribe: () => {}
-      })
-    })
-  })
-};
+const SUPABASE_URL = "https://ygcoeiqqtekdcstyaidi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlnY29laXFxdGVrZGNzdHlhaWRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NTUzODUsImV4cCI6MjA1OTAzMTM4NX0.cjr07w6e0fjfRRYZVMdznXO1Q0i1nu-RR4zAx7vwyjA";
 
-export const signInWithGoogle = async () => {
-  console.log("Sign in with Google not available in open-source version");
-  return { data: null };
-};
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

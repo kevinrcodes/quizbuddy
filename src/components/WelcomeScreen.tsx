@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 
 interface WelcomeScreenProps {
-  onOpenSettings: () => void;
+  onLoginClick: () => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpenSettings }) => {
@@ -26,7 +26,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpenSettings }) 
               <li className="flex justify-between text-sm">
                 <span className="text-white/70">Toggle Visibility</span>
                 <span className="text-white/90">Ctrl+B / Cmd+B</span>
-              </li>
+              </li>S
               <li className="flex justify-between text-sm">
                 <span className="text-white/70">Take Screenshot</span>
                 <span className="text-white/90">Ctrl+H / Cmd+H</span>
@@ -54,13 +54,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpenSettings }) 
         <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
           <h3 className="text-white/90 font-medium mb-2">Getting Started</h3>
           <p className="text-white/70 text-sm mb-3">
-            Before using the application, you need to configure your OpenAI API key.
+            Before using the application, you need to log in.
           </p>
           <Button 
             className="w-full px-4 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
             onClick={onOpenSettings}
           >
-            Open Settings
+            Sign In
           </Button>
         </div>
         

@@ -48,6 +48,16 @@ const electronAPI = {
       throw error
     }
   },
+  // wire the auth handlers
+  signInWithEmail: (email, password) => // TODO is this a problem?
+    ipcRenderer.invoke("signInWithEmail", { email, password }),
+  
+  getCurrentUser: () =>
+    ipcRenderer.invoke("getCurrentUser"),
+  
+  signOut: () =>
+    ipcRenderer.invoke("signOut"),
+
   // Event listeners
   onScreenshotTaken: (
     callback: (data: { path: string; preview: string }) => void
