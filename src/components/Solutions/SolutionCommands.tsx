@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { Screenshot } from "../../types/screenshots"
-import { supabase } from "../../lib/supabase"
+import { supabase } from "../../../electron/supabase"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
 

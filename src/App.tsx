@@ -16,6 +16,7 @@ import { ToastContext } from "./contexts/toast"
 import { WelcomeScreen } from "./components/WelcomeScreen"
 import { SettingsDialog } from "./components/Settings/SettingsDialog"
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LoginForm from "./components/LoginForm"
 
 // Create a React Query client
 const queryClient = new QueryClient({
@@ -31,6 +32,31 @@ const queryClient = new QueryClient({
     }
   }
 })
+
+const TestLoginButton = () => {
+  const { refresh } = useAuth();
+
+  return (
+    <div className="absolute top-4 right-4 bg-black text-white p-4 rounded">
+      <button
+        onClick={async () => {
+          const result = await window.electronAPI.signInWithEmail(
+            "test@example.com",
+            "password"
+          );
+          if (result.success) {
+            console.log("Calling refresh");
+            await refresh();
+          }
+        }}
+        className="bg-white text-black px-3 py-2 rounded"
+      >
+        Test Sign In
+      </button>
+    </div>
+  );
+};
+
 
 // Root component that provides the QueryClient
 function App() {
@@ -53,6 +79,8 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   // use the authcontext to globally manage state
   const { user, loading } = useAuth();
+  // TODO debug this
+  console.log("App user state: ", { user, loading })
 
   // Set unlimited credits
   const updateCredits = useCallback(() => {
@@ -95,7 +123,7 @@ function App() {
       try {
         const hasKey = await window.electronAPI.checkApiKey()
         setHasApiKey(hasKey)
-        
+
         // If no API key is found, show the settings dialog after a short delay
         if (!hasKey) {
           setTimeout(() => {
@@ -106,19 +134,11 @@ function App() {
         console.error("Failed to check API key:", error)
       }
     }
-    
+
     if (isInitialized) {
       checkApiKey()
     }
   }, [isInitialized])
-
-
-  // TODO test that auth is working
-  useEffect(() => {
-    console.log("testing auth");
-    window.electronAPI.getCurrentUser().then(console.log)
-  }, [])
-
 
 
   // Initialize dropdown handler
@@ -129,12 +149,12 @@ function App() {
         // Find both native select elements and custom dropdowns
         const selectElements = document.querySelectorAll('select');
         const customDropdowns = document.querySelectorAll('.dropdown-trigger, [role="combobox"], button:has(.dropdown)');
-        
+
         // Enable native selects
         selectElements.forEach(dropdown => {
           dropdown.disabled = false;
         });
-        
+
         // Enable custom dropdowns by removing any disabled attributes
         customDropdowns.forEach(dropdown => {
           if (dropdown instanceof HTMLElement) {
@@ -142,10 +162,10 @@ function App() {
             dropdown.setAttribute('aria-disabled', 'false');
           }
         });
-        
+
         console.log(`Enabled ${selectElements.length} select elements and ${customDropdowns.length} custom dropdowns`);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isInitialized]);
@@ -156,7 +176,7 @@ function App() {
       console.log("Show settings dialog requested");
       setIsSettingsOpen(true);
     });
-    
+
     return () => {
       unsubscribeSettings();
     };
@@ -169,20 +189,20 @@ function App() {
       try {
         // Set unlimited credits
         updateCredits()
-        
+
         // Load config including language and model settings
         const config = await window.electronAPI.getConfig()
-        
+
         // Load language preference
         if (config && config.language) {
           updateLanguage(config.language)
         } else {
           updateLanguage("python")
         }
-        
+
         // Model settings are now managed through the settings dialog
         // and stored in config as extractionModel, solutionModel, and debuggingModel
-        
+
         markInitialized()
       } catch (error) {
         console.error("Failed to initialize app:", error)
@@ -191,7 +211,7 @@ function App() {
         markInitialized()
       }
     }
-    
+
     initializeApp()
 
     // Event listeners for process events
@@ -229,7 +249,7 @@ function App() {
     console.log('Opening settings dialog');
     setIsSettingsOpen(true);
   }, []);
-  
+
   const handleCloseSettings = useCallback((open: boolean) => {
     console.log('Settings dialog state changed:', open);
     setIsSettingsOpen(open);
@@ -240,7 +260,7 @@ function App() {
       await window.electronAPI.updateConfig({ apiKey })
       setHasApiKey(true)
       showToast("Success", "API key saved successfully", "success")
-      
+
       // Reload app after a short delay to reinitialize with the new API key
       setTimeout(() => {
         window.location.reload()
@@ -260,53 +280,38 @@ function App() {
         <ToastProvider>
           <ToastContext.Provider value={{ showToast }}>
             <div className="relative">
-              {isInitialized ? ( // TODO make and integrate login form
-                hasApiKey ? ( 
-                  <SubscribedApp
-                    credits={credits}
-                    currentLanguage={currentLanguage}
-                    setLanguage={updateLanguage}
-                  />
-                ) : (
-                  <WelcomeScreen onLoginClick={setShow} />
-                )
-              ) : (
+              {loading ? (
                 <div className="min-h-screen bg-black flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin"></div>
-                    <p className="text-white/60 text-sm">
-                      Initializing...
-                    </p>
+                    <p className="text-white/60 text-sm">Loading session...</p>
                   </div>
                 </div>
+              ) : !user ? (
+                showLogin ? (
+                  <LoginForm />
+                ) : (
+                  <WelcomeScreen onLoginClick={() => setShowLogin(true)} />
+                )
+              ) : (
+                <SubscribedApp
+                  credits={credits}
+                  currentLanguage={currentLanguage}
+                  setLanguage={updateLanguage}
+                />
               )}
 
-
-            <div className="absolute top-4 right-4 bg-black text-white p-4 rounded">
-              <button
-                onClick={async () => {
-                  // TODO add an example user in supabase dashboard, then test this code
-                  const result = await window.electronAPI.signInWithEmail(
-                    "test@example.com",
-                    "password"
-                  );
-                  console.log("Sign in result:", result);
-                }}
-                className="bg-white text-black px-3 py-2 rounded"
-              >
-                Test Sign In
-              </button>
-            </div>
-
+              <TestLoginButton/>
+              
               <UpdateNotification />
             </div>
-            
+
             {/* Settings Dialog */}
-            <SettingsDialog 
-              open={isSettingsOpen} 
-              onOpenChange={handleCloseSettings} 
+            <SettingsDialog
+              open={isSettingsOpen}
+              onOpenChange={handleCloseSettings}
             />
-            
+
             <Toast
               open={toastState.open}
               onOpenChange={(open) =>

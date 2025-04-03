@@ -5,7 +5,7 @@ interface WelcomeScreenProps {
   onLoginClick: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpenSettings }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onLoginClick }) => {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full bg-black border border-white/10 rounded-xl p-6 shadow-lg">
@@ -58,7 +58,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onOpenSettings }) 
           </p>
           <Button 
             className="w-full px-4 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
-            onClick={onOpenSettings}
+            onClick={onLoginClick}
           >
             Sign In
           </Button>

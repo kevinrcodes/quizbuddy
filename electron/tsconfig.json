@@ -12,7 +12,12 @@
     "outDir": "../dist-electron",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "electron"]
   },
-  "include": ["*.ts", "ConfigHelper.ts", "../src/types/electron.d.ts"]
+  "include": [
+    "./**/*.ts",          // Include all TS files in electron/
+    "../src/types/electron.d.ts"
+  ]
+
 }

@@ -5,7 +5,7 @@ import { randomBytes } from "crypto"
 import { IIpcHandlerDeps } from "./main"
 import { configHelper } from "./ConfigHelper"
 
-import { supabase } from "../src/lib/supabase"
+import { supabase } from "./supabase"
 
 export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
   console.log("Initializing IPC handlers")
@@ -189,20 +189,17 @@ export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
   ipcMain.handle("signInWithEmail", async (_event, { email, password }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      console.error("Sign in error:", error.message);
       return { success: false, error: error.message };
     }
-    console.log("Sign in successful");
+    console.log("Sign in successful with session ", data.session);
     return { success: true, session: data.session, user: data.user };
   });
   
   ipcMain.handle("getCurrentUser", async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error) {
-      console.error("Get user error:", error.message);
       return { success: false, error: error.message };
     }
-    console.log("Get User successful");
     return { success: true, user: data.user };
   });
   
