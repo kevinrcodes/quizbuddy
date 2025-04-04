@@ -18,7 +18,8 @@ interface Config {
 export class ConfigHelper extends EventEmitter {
   private configPath: string;
   private defaultConfig: Config = {
-    apiKey: "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", // Replace with your actual API key
+    // TODO add some encryptions later
+    apiKey: "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",
     apiProvider: "gemini",
     extractionModel: "gemini-2.0-flash",
     solutionModel: "gemini-2.0-flash",

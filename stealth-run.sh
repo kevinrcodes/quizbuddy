@@ -28,11 +28,20 @@ mkdir -p ~/Library/Application\ Support/interview-coder-v1/extra_screenshots
 echo "=== Step 2: Cleaning previous builds... ==="
 echo "Removing old build files to ensure a fresh start..."
 rm -rf dist dist-electron
-rm -f .env
+
+# Create a temporary .env file for build
+if [ -f .env ]; then
+  cp .env .env.temp
+fi
 
 echo "=== Step 3: Building application... ==="
 echo "This may take a moment..."
 npm run build
+
+# Restore .env file if it existed
+if [ -f .env.temp ]; then
+  mv .env.temp .env
+fi
 
 echo "=== Step 4: Launching in stealth mode... ==="
 echo "Remember: Cmd+B to make it visible, Cmd+[ and Cmd+] to adjust opacity!"
