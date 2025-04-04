@@ -42,10 +42,6 @@ function App() {
   const [credits, setCredits] = useState<number>(999) // Unlimited credits
   const [currentLanguage, setCurrentLanguage] = useState<string>("python")
   const [isInitialized, setIsInitialized] = useState(false)
-  const [hasApiKey, setHasApiKey] = useState(false)
-  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
-  // Note: Model selection is now handled via separate extraction/solution/debugging model settings
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // Set unlimited credits
@@ -83,70 +79,6 @@ function App() {
     []
   )
 
-  // Check for OpenAI API key and prompt if not found
-  useEffect(() => {
-    const checkApiKey = async () => {
-      try {
-        const hasKey = await window.electronAPI.checkApiKey()
-        setHasApiKey(hasKey)
-        
-        // If no API key is found, show the settings dialog after a short delay
-        if (!hasKey) {
-          setTimeout(() => {
-            setIsSettingsOpen(true)
-          }, 1000)
-        }
-      } catch (error) {
-        console.error("Failed to check API key:", error)
-      }
-    }
-    
-    if (isInitialized) {
-      checkApiKey()
-    }
-  }, [isInitialized])
-
-  // Initialize dropdown handler
-  useEffect(() => {
-    if (isInitialized) {
-      // Process all types of dropdown elements with a shorter delay
-      const timer = setTimeout(() => {
-        // Find both native select elements and custom dropdowns
-        const selectElements = document.querySelectorAll('select');
-        const customDropdowns = document.querySelectorAll('.dropdown-trigger, [role="combobox"], button:has(.dropdown)');
-        
-        // Enable native selects
-        selectElements.forEach(dropdown => {
-          dropdown.disabled = false;
-        });
-        
-        // Enable custom dropdowns by removing any disabled attributes
-        customDropdowns.forEach(dropdown => {
-          if (dropdown instanceof HTMLElement) {
-            dropdown.removeAttribute('disabled');
-            dropdown.setAttribute('aria-disabled', 'false');
-          }
-        });
-        
-        console.log(`Enabled ${selectElements.length} select elements and ${customDropdowns.length} custom dropdowns`);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isInitialized]);
-
-  // Listen for settings dialog open requests
-  useEffect(() => {
-    const unsubscribeSettings = window.electronAPI.onShowSettings(() => {
-      console.log("Show settings dialog requested");
-      setIsSettingsOpen(true);
-    });
-    
-    return () => {
-      unsubscribeSettings();
-    };
-  }, []);
-
   // Initialize basic app state
   useEffect(() => {
     // Load config and set values
@@ -165,9 +97,6 @@ function App() {
           updateLanguage("python")
         }
         
-        // Model settings are now managed through the settings dialog
-        // and stored in config as extractionModel, solutionModel, and debuggingModel
-        
         markInitialized()
       } catch (error) {
         console.error("Failed to initialize app:", error)
@@ -179,62 +108,12 @@ function App() {
     
     initializeApp()
 
-    // Event listeners for process events
-    const onApiKeyInvalid = () => {
-      showToast(
-        "API Key Invalid",
-        "Your OpenAI API key appears to be invalid or has insufficient credits",
-        "error"
-      )
-      setApiKeyDialogOpen(true)
-    }
-
-    // Setup API key invalid listener
-    window.electronAPI.onApiKeyInvalid(onApiKeyInvalid)
-
-    // Define a no-op handler for solution success
-    const unsubscribeSolutionSuccess = window.electronAPI.onSolutionSuccess(
-      () => {
-        console.log("Solution success - no credits deducted in this version")
-        // No credit deduction in this version
-      }
-    )
-
     // Cleanup function
     return () => {
-      window.electronAPI.removeListener("API_KEY_INVALID", onApiKeyInvalid)
-      unsubscribeSolutionSuccess()
       window.__IS_INITIALIZED__ = false
       setIsInitialized(false)
     }
-  }, [updateCredits, updateLanguage, markInitialized, showToast])
-
-  // API Key dialog management
-  const handleOpenSettings = useCallback(() => {
-    console.log('Opening settings dialog');
-    setIsSettingsOpen(true);
-  }, []);
-  
-  const handleCloseSettings = useCallback((open: boolean) => {
-    console.log('Settings dialog state changed:', open);
-    setIsSettingsOpen(open);
-  }, []);
-
-  const handleApiKeySave = useCallback(async (apiKey: string) => {
-    try {
-      await window.electronAPI.updateConfig({ apiKey })
-      setHasApiKey(true)
-      showToast("Success", "API key saved successfully", "success")
-      
-      // Reload app after a short delay to reinitialize with the new API key
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
-    } catch (error) {
-      console.error("Failed to save API key:", error)
-      showToast("Error", "Failed to save API key", "error")
-    }
-  }, [showToast])
+  }, [updateCredits, updateLanguage, markInitialized])
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -242,15 +121,11 @@ function App() {
         <ToastContext.Provider value={{ showToast }}>
           <div className="relative">
             {isInitialized ? (
-              hasApiKey ? (
-                <SubscribedApp
-                  credits={credits}
-                  currentLanguage={currentLanguage}
-                  setLanguage={updateLanguage}
-                />
-              ) : (
-                <WelcomeScreen onOpenSettings={handleOpenSettings} />
-              )
+              <SubscribedApp
+                credits={credits}
+                currentLanguage={currentLanguage}
+                setLanguage={updateLanguage}
+              />
             ) : (
               <div className="min-h-screen bg-black flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
@@ -267,7 +142,7 @@ function App() {
           {/* Settings Dialog */}
           <SettingsDialog 
             open={isSettingsOpen} 
-            onOpenChange={handleCloseSettings} 
+            onOpenChange={(open) => setIsSettingsOpen(open)} 
           />
           
           <Toast
