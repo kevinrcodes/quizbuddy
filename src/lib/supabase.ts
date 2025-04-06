@@ -32,7 +32,7 @@ export const supabase = {
       })
     })
   })
-};
+}; // TODO and should i delete this?
 
 export const signInWithGoogle = async () => {
   console.log("Sign in with Google not available in open-source version");
@@ -52,6 +52,7 @@ export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
 // Auth helper functions
 export const signUp = async (email: string, password: string) => {
+  // TODO fix email verification
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,

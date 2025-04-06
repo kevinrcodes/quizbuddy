@@ -33,26 +33,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
     onTooltipVisibilityChange(isTooltipVisible, tooltipHeight)
   }, [isTooltipVisible])
 
-  const handleSignOut = async () => {
-    console.log("handleSignOut called in QueueCommands")
-    try {
-      const { error } = await signOut()
-      if (error) {
-        throw error
-      }
-      
-      showToast('Success', 'Logged out successfully', 'success');
-      
-      // Reload the app after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } catch (err) {
-      console.error("Error logging out:", err);
-      showToast('Error', 'Failed to log out', 'error');
-    }
-  }
-
   const handleMouseEnter = () => {
     setIsTooltipVisible(true)
   }
@@ -397,7 +377,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                       </div>
 
                       <button
-                        onClick={handleSignOut}
+                        onClick={() => signOut()}
                         className="flex items-center gap-2 text-[11px] text-red-400 hover:text-red-300 transition-colors w-full"
                       >
                         <div className="w-4 h-4 flex items-center justify-center">

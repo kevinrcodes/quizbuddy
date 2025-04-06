@@ -56,10 +56,8 @@ function AppContent() {
   const [showSignup, setShowSignup] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState("python")
 
-  console.log('Session state:', session); // Log the session state
-  // TODO when running with ./stealth_run.sh, it goes directly to the app
-  // when there is no session! let's make sure we check for a session before
-  // rendering the app
+  console.log('Session state:', session);
+  // seems to be working now, auth flow works (except for sign up)
 
   if (loading) {
     return (
