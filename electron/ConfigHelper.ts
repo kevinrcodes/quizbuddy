@@ -20,10 +20,10 @@ export class ConfigHelper extends EventEmitter {
   private defaultConfig: Config = {
     // TODO add some encryptions later
     apiKey: "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",
-    apiProvider: "gemini",
-    extractionModel: "gemini-2.0-flash",
-    solutionModel: "gemini-2.0-flash",
-    debuggingModel: "gemini-2.0-flash",
+    apiProvider: "openai",
+    extractionModel: "gpt-4o",
+    solutionModel: "gpt-4o",
+    debuggingModel: "gpt-4o",
     language: "python",
     opacity: 1.0
   };

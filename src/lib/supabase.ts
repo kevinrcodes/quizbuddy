@@ -64,11 +64,20 @@ export const signIn = async (email: string, password: string) => {
     email,
     password,
   })
+  console.log('Supabase client configuration after signIn:', {
+    supabaseUrl,
+    supabaseAnonKey
+  })
   return { data, error }
 }
 
 export const signOut = async () => {
+  console.log('SignOut called in supabase.ts')
   const { error } = await supabaseClient.auth.signOut()
+  console.log('Supabase client configuration after signOut:', {
+    supabaseUrl,
+    supabaseAnonKey
+  })
   return { error }
 }
 

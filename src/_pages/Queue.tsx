@@ -75,6 +75,12 @@ const Queue: React.FC<QueueProps> = ({
         if (isTooltipVisible) {
           contentHeight += tooltipHeight
         }
+        console.log('Updating window dimensions:', {
+          width: contentWidth,
+          height: contentHeight,
+          isTooltipVisible,
+          tooltipHeight
+        })
         window.electronAPI.updateContentDimensions({
           width: contentWidth,
           height: contentHeight
@@ -97,7 +103,6 @@ const Queue: React.FC<QueueProps> = ({
         if (screenshots.length > 0) {
           const lastScreenshot = screenshots[screenshots.length - 1];
           await handleDeleteScreenshot(screenshots.length - 1);
-          // Toast removed as requested
         } else {
           showToast("No Screenshots", "There are no screenshots to delete", "neutral");
         }
@@ -108,7 +113,7 @@ const Queue: React.FC<QueueProps> = ({
           "There was an error processing your screenshots.",
           "error"
         )
-        setView("queue") // Revert to queue if processing fails
+        setView("queue")
         console.error("Processing error:", error)
       }),
       window.electronAPI.onProcessingNoScreenshots(() => {
@@ -118,7 +123,6 @@ const Queue: React.FC<QueueProps> = ({
           "neutral"
         )
       }),
-      // Removed out of credits handler - unlimited credits in this version
     ]
 
     return () => {

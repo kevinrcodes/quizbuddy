@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 
 function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setShowSignup: (show: boolean) => void }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="w-full max-w-md p-8 space-y-8 bg-white/5 rounded-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">
@@ -56,9 +56,14 @@ function AppContent() {
   const [showSignup, setShowSignup] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState("python")
 
+  console.log('Session state:', session); // Log the session state
+  // TODO when running with ./stealth_run.sh, it goes directly to the app
+  // when there is no session! let's make sure we check for a session before
+  // rendering the app
+
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center z-50">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin"></div>
           <p className="text-white/60 text-sm">Loading...</p>
@@ -68,14 +73,11 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="relative">
       {!session ? (
         <AuthScreen showSignup={showSignup} setShowSignup={setShowSignup} />
       ) : (
-        <div className="p-4">
-          <div className="flex justify-end">
-            <Button onClick={() => signOut()}>Sign Out</Button>
-          </div>
+        <div className="w-fit">
           <SubscribedApp 
             credits={999} // For now, assume all users have unlimited credits
             currentLanguage={currentLanguage}

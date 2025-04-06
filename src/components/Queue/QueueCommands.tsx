@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
+import { useAuth } from "../../contexts/auth"
 
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
@@ -22,6 +23,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+  const { signOut } = useAuth()
 
   useEffect(() => {
     let tooltipHeight = 0
@@ -32,15 +34,12 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   }, [isTooltipVisible])
 
   const handleSignOut = async () => {
+    console.log("handleSignOut called in QueueCommands")
     try {
-      // Clear any local storage or electron-specific data
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Clear the API key in the configuration
-      await window.electronAPI.updateConfig({
-        apiKey: '',
-      });
+      const { error } = await signOut()
+      if (error) {
+        throw error
+      }
       
       showToast('Success', 'Logged out successfully', 'success');
       
