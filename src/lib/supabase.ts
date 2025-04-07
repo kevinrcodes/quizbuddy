@@ -1,45 +1,11 @@
-// This file has been emptied to remove Supabase dependencies.
-// The open-source version uses local configuration instead.
-
-// Export empty objects to prevent import errors in case any components still reference this file
-export const supabase = {
-  auth: {
-    getUser: async () => ({ data: { user: null } }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signOut: async () => ({ error: null }),
-    exchangeCodeForSession: async () => ({ error: null }),
-    signInWithOAuth: async () => ({ data: null, error: null })
-  },
-  from: () => ({
-    select: () => ({
-      eq: () => ({
-        single: async () => null,
-        maybeSingle: async () => null
-      })
-    }),
-    update: () => ({
-      eq: () => ({
-        select: () => ({
-          single: async () => null
-        })
-      })
-    })
-  }),
-  channel: () => ({
-    on: () => ({
-      subscribe: () => ({
-        unsubscribe: () => {}
-      })
-    })
-  })
-}; // TODO and should i delete this?
+import { createClient } from '@supabase/supabase-js'
 
 export const signInWithGoogle = async () => {
   console.log("Sign in with Google not available in open-source version");
   return { data: null };
 };
 
-import { createClient } from '@supabase/supabase-js'
+// implement real auth with supabase
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -48,12 +14,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Auth helper functions
 export const signUp = async (email: string, password: string) => {
   // TODO fix email verification
-  const { data, error } = await supabaseClient.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   })
@@ -61,7 +27,7 @@ export const signUp = async (email: string, password: string) => {
 }
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -74,7 +40,7 @@ export const signIn = async (email: string, password: string) => {
 
 export const signOut = async () => {
   console.log('SignOut called in supabase.ts')
-  const { error } = await supabaseClient.auth.signOut()
+  const { error } = await supabase.auth.signOut()
   console.log('Supabase client configuration after signOut:', {
     supabaseUrl,
     supabaseAnonKey
@@ -83,6 +49,6 @@ export const signOut = async () => {
 }
 
 export const getSession = async () => {
-  const { data: { session }, error } = await supabaseClient.auth.getSession()
+  const { data: { session }, error } = await supabase.auth.getSession()
   return { session, error }
 }

@@ -27,6 +27,10 @@ const queryClient = new QueryClient({
 
 function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setShowSignup: (show: boolean) => void }) {
   return (
+    // TODO figure out how the window works
+    // why isn't the part around it click throuhgable?
+    // also make the background of sign-in page solid
+
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="w-full max-w-md p-8 space-y-8 bg-white/5 rounded-lg">
         <div className="text-center">
