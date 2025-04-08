@@ -31,7 +31,7 @@ function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setSho
       <div className="w-full max-w-md p-8 space-y-8 bg-white/5 rounded-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">
-            {showSignup ? "Create an Account" : "Sign In"}
+            {"Welcome to Codebuddy"}
           </h2>
         </div>
         {showSignup ? <SignupForm /> : <LoginForm />}

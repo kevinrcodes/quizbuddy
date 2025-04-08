@@ -8,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-// TODO actually let's use the label, move it over to /src/components/ui/
-// and then fix the tailwind thing in /src/index.css
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'

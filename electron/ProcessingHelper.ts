@@ -61,7 +61,7 @@ export class ProcessingHelper {
     try {
       const config = configHelper.loadConfig();
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         if (config.apiKey) {
           this.openaiClient = new OpenAI({ 
             apiKey: config.apiKey,
@@ -167,7 +167,7 @@ export class ProcessingHelper {
     const config = configHelper.loadConfig();
     
     // First verify we have a valid AI client
-    if (config.apiProvider === "openai" && !this.openaiClient) {
+    if (true || config.apiProvider === "openai" && !this.openaiClient) {
       this.initializeAIClient();
       
       if (!this.openaiClient) {
@@ -447,7 +447,8 @@ export class ProcessingHelper {
 
       let problemInfo;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
+        console.log("Attempting to process screenshots with OpenAI")
         // Verify OpenAI client
         if (!this.openaiClient) {
           this.initializeAIClient(); // Try to reinitialize
@@ -480,7 +481,7 @@ export class ProcessingHelper {
             ]
           }
         ];
-
+        console.log("Sending to OpenAI Vision API...")
         // Send to OpenAI Vision API
         const extractionResponse = await this.openaiClient.chat.completions.create({
           model: config.extractionModel || "gpt-4o",
@@ -488,7 +489,7 @@ export class ProcessingHelper {
           max_tokens: 4000,
           temperature: 0.2
         });
-
+        console.log("Received response from OpenAI Vision API")
         // Parse the response
         try {
           const responseText = extractionResponse.choices[0].message.content;
@@ -502,7 +503,9 @@ export class ProcessingHelper {
             error: "Failed to parse problem information. Please try again or use clearer screenshots."
           };
         }
+        console.log("Successfully processed screenshots with OpenAI")
       } else {
+        console.log("Attempting to process screenshots with Gemini")
         // Use Gemini API
         if (!this.geminiApiKey) {
           return {
@@ -691,7 +694,7 @@ Your solution should be efficient, well-commented, and handle edge cases.
 
       let responseContent;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         // OpenAI processing
         if (!this.openaiClient) {
           return {
@@ -884,7 +887,7 @@ Your solution should be efficient, well-commented, and handle edge cases.
       
       let debugContent;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         if (!this.openaiClient) {
           return {
             success: false,
