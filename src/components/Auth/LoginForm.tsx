@@ -11,6 +11,7 @@ import {
 // TODO actually let's use the label, move it over to /src/components/ui/
 // and then fix the tailwind thing in /src/index.css
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
@@ -50,7 +51,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <span className="text-sm font-medium leading-none">Email</span>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -63,7 +64,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <span className="text-sm font-medium leading-none">Password</span>
+                  <Label htmlFor="password">Password</Label>
                   <a
                     href="/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
