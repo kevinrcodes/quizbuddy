@@ -27,10 +27,10 @@ const queryClient = new QueryClient({
 
 function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setShowSignup: (show: boolean) => void }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white/5 rounded-lg">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-red-600">
+      <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-lg border border-zinc-800">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-zinc-100">
             {"Welcome to Codebuddy"}
           </h2>
         </div>
@@ -38,7 +38,7 @@ function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setSho
         <div className="text-center">
           <Button
             variant="link"
-            className="text-white/60 hover:text-white"
+            className="text-zinc-400 hover:text-zinc-200"
             onClick={() => setShowSignup(!showSignup)}
           >
             {showSignup
@@ -61,27 +61,29 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin"></div>
-          <p className="text-white/60 text-sm">Loading...</p>
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-zinc-950">
+        <div className="flex flex-col items-center gap-3 bg-purple-500 border-2 border-purple-700 p-3">
+          <div className="w-6 h-6 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin"></div>
+          <p className="text-zinc-400 text-sm">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="relative">
+    <div className="relative bg-orange-500 border-2 border-orange-700 p-2">
       {!session ? (
         <AuthScreen showSignup={showSignup} setShowSignup={setShowSignup} />
       ) : (
-        <div className="w-fit">
+        <div className="w-fit bg-pink-500 border-2 border-pink-700 p-2">
           <SubscribedApp 
             credits={999} // For now, assume all users have unlimited credits
             currentLanguage={currentLanguage}
             setLanguage={setCurrentLanguage}
           />
-          <UpdateNotification />
+          <div className="bg-teal-500 border-2 border-teal-700">
+            <UpdateNotification />
+          </div>
         </div>
       )}
     </div>
@@ -110,7 +112,9 @@ export default function App() {
       <ToastProvider>
         <ToastContext.Provider value={{ showToast }}>
           <AuthProvider>
-            <AppContent />
+            <div className="bg-indigo-500 border-2 border-indigo-700 p-2">
+              <AppContent />
+            </div>
           </AuthProvider>
         </ToastContext.Provider>
       </ToastProvider>

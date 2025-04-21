@@ -40,17 +40,17 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   }
 
   return (
-    <div className={cn('flex flex-col gap-6 bg-black text-white', className)} {...props}>
-      <Card>
+    <div className={cn('flex flex-col gap-6 bg-zinc-900 text-zinc-100', className)} {...props}>
+      <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardDescription className="text-zinc-400">Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-zinc-300">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -58,15 +58,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-black text-white"
+                  className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-zinc-300">Password</Label>
                   <a
                     href="/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm text-zinc-400 underline-offset-4 hover:text-zinc-200 hover:underline"
                   >
                     Forgot your password?
                   </a>
@@ -77,7 +77,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-black text-white"
+                  className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
@@ -85,12 +85,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <a href="/sign-up" className="underline underline-offset-4">
-                Sign up
-              </a>
-            </div>
+            
+            
           </form>
         </CardContent>
       </Card>

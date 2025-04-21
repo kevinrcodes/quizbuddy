@@ -47,31 +47,31 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn('flex flex-col gap-6 bg-zinc-900 text-zinc-100', className)} {...props}>
       {success ? (
-        <Card>
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-            <CardDescription>Check your email to confirm</CardDescription>
+            <CardDescription className="text-zinc-400">Check your email to confirm</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-zinc-400">
               You've successfully signed up. Please check your email to confirm your account before
               signing in.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-2xl">Sign up</CardTitle>
-            <CardDescription>Create a new account</CardDescription>
+            <CardDescription className="text-zinc-400">Create a new account</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-zinc-300">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -79,11 +79,12 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                   />
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-zinc-300">Password</Label>
                   </div>
                   <Input
                     id="password"
@@ -91,11 +92,12 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                   />
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="repeat-password">Repeat Password</Label>
+                    <Label htmlFor="repeat-password" className="text-zinc-300">Repeat Password</Label>
                   </div>
                   <Input
                     id="repeat-password"
@@ -103,6 +105,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                     required
                     value={repeatPassword}
                     onChange={(e) => setRepeatPassword(e.target.value)}
+                    className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
@@ -110,12 +113,8 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                   {isLoading ? 'Creating an account...' : 'Sign up'}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{' '}
-                <a href="/login" className="underline underline-offset-4">
-                  Login
-                </a>
-              </div>
+              
+
             </form>
           </CardContent>
         </Card>
