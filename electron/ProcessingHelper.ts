@@ -465,7 +465,17 @@ export class ProcessingHelper {
         const messages = [
           {
             role: "system" as const, 
-            content: "You are a quiz question interpreter. Analyze the screenshot of the multiple choice question and extract all relevant information. Return the information in JSON format with these fields: problem_statement (the question text), options (array of possible multiple choice answers). Just return the structured JSON without any other text."
+            content: `
+You are a quiz question interpreter. Analyze the screenshot of the multiple choice questions and extract all relevant information. 
+There may be more than one question in the screenshot, just focus on the first question you see. 
+Note that the question might have background information, so make sure to include that in the problem statement. 
+
+Return the information in JSON format with these fields: 
+- problem_statement (the full question text) 
+- options (array of possible multiple choice answers). 
+
+Just return the structured JSON without any other text.
+`
           },
           {
             role: "user" as const,
@@ -662,10 +672,10 @@ export class ProcessingHelper {
           progress: 60
         });
       }
-
+      console.log("creating prompt for ", problemInfo)
       // Create prompt for solution generation
       const promptText = `
-Analyze the following quiz question and provide the correct answer:
+Analyze the following quiz question and provide the best answer:
 
 QUESTION:
 ${problemInfo.problem_statement}
@@ -674,11 +684,23 @@ OPTIONS:
 ${problemInfo.options.join('\n')}
 
 I need the response in the following format:
-1. Correct Answer: The letter/option that is correct
-2. Explanation: A detailed explanation of why this is the correct answer (2 to 4 sentences)
-3. Analysis: Analysis of why other options are incorrect (if applicable, 1-3 sentences)
+Correct Answer: The letter (A, B, C, D, etc.) corresponding to the best answer, followed by the option text.
+Explanation: [A brief 2-4 sentence explanation of why this is the best answer]
+Incorrect Options:
+- [Option x]: [1-2 sentences explaining why this option is incorrect]
+- [Option y]: [1-2 sentences explaining why this option is incorrect
+- Repeat for all incorrect options
 
-Your response should be clear, well-reasoned, and educational.
+Example, assuming the question is "What is 2+2?" and the options are [1, 2, 3, 4]:
+
+The correct answer is D: "4"
+Explanation: "The answer is 4 because 2+2=4"
+Incorrect Options:
+- A: "1" is incorrect because...
+- B: "2" is incorrect because...
+- C: "3" is incorrect because...
+
+Note: Only list the incorrect options, not the correct one. Each incorrect option should be on a new line starting with a dash (-).
 `;
 
       let responseContent;
@@ -696,7 +718,7 @@ Your response should be clear, well-reasoned, and educational.
         const solutionResponse = await this.openaiClient.chat.completions.create({
           model: config.solutionModel || "gpt-4o",
           messages: [
-            { role: "system", content: "You are an expert quiz question solver. Provide clear, well-reasoned answers with an explanation in pig latin." },
+            { role: "system", content: "You are an expert quiz question solver. Provide clear, well-reasoned answers." },
             { role: "user", content: promptText }
           ],
           max_tokens: 4000,
@@ -754,16 +776,24 @@ Your response should be clear, well-reasoned, and educational.
           };
         }
       }
-      
+
       // Extract parts from the response
       const correctAnswerMatch = responseContent.match(/Correct Answer:?\s*([^\n]+)/i);
-      const explanationMatch = responseContent.match(/Explanation:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*(?:Analysis|$))/i);
-      const analysisMatch = responseContent.match(/Analysis:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*$)/i);
+      const explanationMatch = responseContent.match(/Explanation:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*(?:Incorrect Options|$))/i);
+      const incorrectOptionsMatch = responseContent.match(/Incorrect Options:?\s*([\s\S]+)$/i);
+      
+      console.log("correct answer obtained: ", correctAnswerMatch ? correctAnswerMatch[1].trim() : "Answer not found")
+      console.log("explanation obtained: ", explanationMatch ? explanationMatch[1].trim() : "No explanation provided")
       
       const formattedResponse = {
-        correct_answer: correctAnswerMatch ? correctAnswerMatch[1].trim() : "Answer not found",
+        answer: correctAnswerMatch ? correctAnswerMatch[1].trim() : "Answer not found",
         explanation: explanationMatch ? explanationMatch[1].trim() : "No explanation provided",
-        analysis: analysisMatch ? analysisMatch[1].trim() : "No analysis provided"
+        analysis: incorrectOptionsMatch ? 
+          incorrectOptionsMatch[1]
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.startsWith('-'))
+            .map(line => line.substring(1).trim()) : []
       };
 
       return { success: true, data: formattedResponse };
