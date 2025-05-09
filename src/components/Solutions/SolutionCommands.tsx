@@ -93,7 +93,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
           </div>
 
           {/* Screenshot and Debug commands - Only show if not processing */}
-          {!isProcessing && (
+          {false && !isProcessing && (
             <>
               <div
                 className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
@@ -280,7 +280,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                       </div>
 
                       {/* Screenshot and Debug commands - Only show if not processing */}
-                      {!isProcessing && (
+                      {false &&!isProcessing && (
                         <>
                           <div
                             className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
@@ -413,13 +413,13 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
 
                     {/* Separator and Log Out */}
                     <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
+                      {/* <LanguageSelector
                         currentLanguage={currentLanguage}
                         setLanguage={setLanguage}
-                      />
+                      /> */}
 
                       {/* API Key Settings */}
-                      <div className="mb-3 px-2 space-y-1">
+                      {/* <div className="mb-3 px-2 space-y-1">
                         <div className="flex items-center justify-between text-[13px] font-medium text-white/90">
                           <span>OpenAI API Settings</span>
                           <button
@@ -429,7 +429,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                             Settings
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       <button
                         onClick={handleSignOut}

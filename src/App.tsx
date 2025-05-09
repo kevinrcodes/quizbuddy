@@ -27,11 +27,11 @@ const queryClient = new QueryClient({
 
 function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setShowSignup: (show: boolean) => void }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-red-600">
-      <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-lg border border-zinc-800">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="w-full max-w-md p-8 space-y-8 rounded-lg border border-zinc-800">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-zinc-100">
-            {"Welcome to Codebuddy"}
+            {"Welcome to Quiz Buddy"}
           </h2>
         </div>
         {showSignup ? <SignupForm /> : <LoginForm />}
@@ -70,17 +70,17 @@ function AppContent() {
   }
 
   return (
-    <div className="relative bg-orange-500 border-2 border-orange-700 p-2">
+    <div className="relative p-2">
       {!session ? (
         <AuthScreen showSignup={showSignup} setShowSignup={setShowSignup} />
       ) : (
-        <div className="w-fit bg-pink-500 border-2 border-pink-700 p-2">
+        <div className="w-fit p-2">
           <SubscribedApp 
             credits={999} // For now, assume all users have unlimited credits
             currentLanguage={currentLanguage}
             setLanguage={setCurrentLanguage}
           />
-          <div className="bg-teal-500 border-2 border-teal-700">
+          <div>
             <UpdateNotification />
           </div>
         </div>
@@ -111,9 +111,7 @@ export default function App() {
       <ToastProvider>
         <ToastContext.Provider value={{ showToast }}>
           <AuthProvider>
-            <div className="bg-indigo-500 border-2 border-indigo-700 p-2">
-              <AppContent />
-            </div>
+            <AppContent />
           </AuthProvider>
         </ToastContext.Provider>
       </ToastProvider>

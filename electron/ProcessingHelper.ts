@@ -468,12 +468,13 @@ export class ProcessingHelper {
             content: `
 You are a quiz question interpreter. Analyze the screenshot of the multiple choice questions and extract all relevant information. 
 There may be more than one question in the screenshot, just focus on the first question you see. 
-Note that the question might have background information, so make sure to include that in the problem statement. 
 
 Return the information in JSON format with these fields: 
-- problem_statement (the full question text) 
+- background_info (any contextual information or background provided before the actual question)
+- problem_statement (the actual question text, without the background info) 
 - options (array of possible multiple choice answers). 
 
+If there is no background information, leave the background_info field as an empty string.
 Just return the structured JSON without any other text.
 `
           },
@@ -675,7 +676,9 @@ Just return the structured JSON without any other text.
       console.log("creating prompt for ", problemInfo)
       // Create prompt for solution generation
       const promptText = `
-Analyze the following quiz question and provide the best answer:
+Analyze the following quiz question, think carefully, and provide the best answer:
+
+${problemInfo.background_info || ""}
 
 QUESTION:
 ${problemInfo.problem_statement}

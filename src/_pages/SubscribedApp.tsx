@@ -135,9 +135,9 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
   }, [view])
 
   return (
-    <div ref={containerRef} className="min-h-0 bg-blue-500 p-3 border-2 border-blue-700">
+    <div ref={containerRef} className="min-h-0">
       {view === "queue" ? (
-        <div className="bg-green-500 border-2 border-green-700">
+        <div>
           <Queue
             setView={setView}
             credits={credits}
@@ -146,7 +146,7 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
           />
         </div>
       ) : view === "solutions" ? (
-        <div className="bg-red-500 border-2 border-red-700">
+        <div>
           <Solutions
             setView={setView}
             credits={credits}

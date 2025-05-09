@@ -364,7 +364,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                       /> */}
 
                       {/* API Key Settings */}
-                      <div className="mb-3 px-2 space-y-1">
+                      {/* <div className="mb-3 px-2 space-y-1">
                         <div className="flex items-center justify-between text-[13px] font-medium text-white/90">
                           <span>OpenAI API Settings</span>
                           <button
@@ -374,7 +374,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                             Settings
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       <button
                         onClick={() => signOut()}

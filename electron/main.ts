@@ -176,14 +176,16 @@ if (process.defaultApp && process.argv.length >= 2) {
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
+  console.log('Another instance is already running, quitting...')
   app.quit()
 } else {
   app.on("second-instance", (event, commandLine) => {
+    console.log('Second instance detected, focusing existing window...')
     // Someone tried to run a second instance, we should focus our window.
     if (state.mainWindow) {
       if (state.mainWindow.isMinimized()) state.mainWindow.restore()
       state.mainWindow.focus()
-
+      
       // Protocol handler removed - no longer using auth callbacks
     }
   })

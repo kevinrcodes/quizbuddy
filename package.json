@@ -1,5 +1,5 @@
 {
-  "name": "interview-coder-v1",
+  "name": "Quiz Buddy",
   "version": "1.0.19",
   "main": "./dist-electron/main.js",
   "scripts": {
@@ -13,8 +13,8 @@
     "package-win": "npm run build && electron-builder build --win"
   },
   "build": {
-    "appId": "com.chunginlee.interviewcoder",
-    "productName": "Interview Coder",
+    "appId": "com.rengroup.quizbuddy",
+    "productName": "Quiz Buddy",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -46,7 +46,7 @@
           ]
         }
       ],
-      "artifactName": "Interview-Coder-${arch}.${ext}",
+      "artifactName": "Quiz-Buddy-${arch}.${ext}",
       "icon": "assets/icons/mac/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -55,9 +55,9 @@
       "identity": "Developer ID Application",
       "notarize": true,
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "quizbuddy-protocol",
         "schemes": [
-          "interview-coder"
+          "quizbuddy"
         ]
       }
     },
@@ -68,9 +68,9 @@
       "icon": "assets/icons/win/icon.ico",
       "artifactName": "${productName}-Windows-${version}.${ext}",
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "quizbuddy-protocol",
         "schemes": [
-          "interview-coder"
+          "quizbuddy"
         ]
       }
     },
@@ -81,17 +81,17 @@
       "icon": "assets/icons/png/icon-256x256.png",
       "artifactName": "${productName}-Linux-${version}.${ext}",
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "quizbuddy-protocol",
         "schemes": [
-          "interview-coder"
+          "quizbuddy"
         ]
       }
     },
     "publish": [
       {
         "provider": "github",
-        "owner": "ibttf",
-        "repo": "interview-coder",
+        "owner": "kevinrcodes",
+        "repo": "quizbuddy",
         "private": false,
         "releaseType": "release"
       }
@@ -116,9 +116,9 @@
     "technical interview",
     "tool"
   ],
-  "author": "Interview Coder Contributors",
+  "author": "Quiz Buddy Contributors",
   "license": "AGPL-3.0-or-later",
-  "description": "An invisible desktop application to help you pass your technical interviews.",
+  "description": "An invisible desktop application to help you ace your multiple choice quiz.",
   "dependencies": {
     "@electron/notarize": "^2.3.0",
     "@emotion/react": "^11.11.0",
