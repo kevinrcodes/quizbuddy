@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -8,16 +7,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/auth'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const { signIn } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,13 +25,10 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) throw error
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      location.href = '/info'
+      const { error } = await signIn(email, password)
+      if (error) {
+        throw error
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {

@@ -358,10 +358,10 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
 
                     {/* Separator and Log Out */}
                     <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
+                      {/* <LanguageSelector  not needed for the quiz solver
                         currentLanguage={currentLanguage}
                         setLanguage={setLanguage}
-                      />
+                      /> */}
 
                       {/* API Key Settings */}
                       <div className="mb-3 px-2 space-y-1">

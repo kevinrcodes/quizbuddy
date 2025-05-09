@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -11,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/auth'
 
 // similar to LoginForm.tsx, we're using supabase's auth functions directly,
 // and not the abstrcated helper methods. 
@@ -21,6 +21,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const { signUp } = useAuth()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,10 +34,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
+      const { error } = await signUp(email, password)
       if (error) throw error
       setSuccess(true)
     } catch (error: unknown) {

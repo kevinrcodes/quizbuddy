@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { Screenshot } from "../../types/screenshots"
-import { supabase } from "../../lib/supabase"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
+import { useAuth } from "../../contexts/auth"
 
 export interface SolutionCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
@@ -13,20 +13,6 @@ export interface SolutionCommandsProps {
   credits: number
   currentLanguage: string
   setLanguage: (language: string) => void
-}
-
-const handleSignOut = async () => {
-  try {
-    // Clear any local storage or electron-specific data first
-    localStorage.clear()
-    sessionStorage.clear()
-
-    // Then sign out from Supabase
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  } catch (err) {
-    console.error("Error signing out:", err)
-  }
 }
 
 const SolutionCommands: React.FC<SolutionCommandsProps> = ({
@@ -40,6 +26,22 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+  const { signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    try {
+      // Clear any local storage or electron-specific data first
+      localStorage.clear()
+      sessionStorage.clear()
+
+      // Then sign out using auth context
+      const { error } = await signOut()
+      if (error) throw error
+    } catch (err) {
+      console.error("Error signing out:", err)
+      showToast("Error", "Failed to sign out", "error")
+    }
+  }
 
   useEffect(() => {
     if (onTooltipVisibilityChange) {

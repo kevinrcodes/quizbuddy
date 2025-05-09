@@ -30,8 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn: async (email: string, password: string) => {
       const { error } = await signIn(email, password)
       if (!error) {
-        const { session } = await getSession()
-        setSession(session)
+        const { session: newSession } = await getSession()
+        setSession(newSession)
       }
       return { error }
     },

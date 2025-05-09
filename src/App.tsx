@@ -57,7 +57,6 @@ function AppContent() {
   const [currentLanguage, setCurrentLanguage] = useState("python")
 
   console.log('Session state:', session);
-  // seems to be working now, auth flow works (except for sign up)
 
   if (loading) {
     return (

@@ -426,11 +426,31 @@ function toggleMainWindow(): void {
 // Window movement functions
 function moveWindowHorizontal(updateFn: (x: number) => number): void {
   if (!state.mainWindow) return
-  state.currentX = updateFn(state.currentX)
-  state.mainWindow.setPosition(
-    Math.round(state.currentX),
-    Math.round(state.currentY)
-  )
+
+  const newX = updateFn(state.currentX)
+  // Allow window to go 2/3 off screen in either direction
+  const maxLeftLimit = (-(state.windowSize?.width || 0) * 2) / 3
+  const maxRightLimit =
+    state.screenWidth + ((state.windowSize?.width || 0) * 2) / 3
+
+  // Log the current state and limits
+  console.log({
+    newX,
+    maxLeftLimit,
+    maxRightLimit,
+    screenWidth: state.screenWidth,
+    windowWidth: state.windowSize?.width,
+    currentX: state.currentX
+  })
+
+  // Only update if within bounds
+  if (newX >= maxLeftLimit && newX <= maxRightLimit) {
+    state.currentX = newX
+    state.mainWindow.setPosition(
+      Math.round(state.currentX),
+      Math.round(state.currentY)
+    )
+  }
 }
 
 function moveWindowVertical(updateFn: (y: number) => number): void {
@@ -441,8 +461,6 @@ function moveWindowVertical(updateFn: (y: number) => number): void {
   const maxUpLimit = (-(state.windowSize?.height || 0) * 2) / 3
   const maxDownLimit =
     state.screenHeight + ((state.windowSize?.height || 0) * 2) / 3
-
-  // Log the current state and limits
   console.log({
     newY,
     maxUpLimit,
@@ -451,8 +469,6 @@ function moveWindowVertical(updateFn: (y: number) => number): void {
     windowHeight: state.windowSize?.height,
     currentY: state.currentY
   })
-
-  // Only update if within bounds
   if (newY >= maxUpLimit && newY <= maxDownLimit) {
     state.currentY = newY
     state.mainWindow.setPosition(
