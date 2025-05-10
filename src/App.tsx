@@ -28,24 +28,16 @@ const queryClient = new QueryClient({
 function AuthScreen({ showSignup, setShowSignup }: { showSignup: boolean, setShowSignup: (show: boolean) => void }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="w-full max-w-md p-8 space-y-8 rounded-lg border border-zinc-800">
+      <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-lg border border-zinc-800">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-zinc-100">
             {"Welcome to Quiz Buddy"}
           </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            {"An invisible desktop application to help you ace any multiple choice quiz."}
+          </p>
         </div>
-        {showSignup ? <SignupForm /> : <LoginForm />}
-        <div className="text-center">
-          <Button
-            variant="link"
-            className="text-zinc-400 hover:text-zinc-200"
-            onClick={() => setShowSignup(!showSignup)}
-          >
-            {showSignup
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Sign up"}
-          </Button>
-        </div>
+        {showSignup ? <SignupForm setShowSignup={setShowSignup} /> : <LoginForm setShowSignup={setShowSignup} />}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 {
-  "name": "Quiz Buddy",
+  "name": "quiz-buddy",
   "version": "1.0.19",
   "main": "./dist-electron/main.js",
   "scripts": {
@@ -118,7 +118,7 @@
   ],
   "author": "Quiz Buddy Contributors",
   "license": "AGPL-3.0-or-later",
-  "description": "An invisible desktop application to help you ace your multiple choice quiz.",
+  "description": "An invisible desktop application to help you ace any multiple choice quiz.",
   "dependencies": {
     "@electron/notarize": "^2.3.0",
     "@emotion/react": "^11.11.0",

@@ -12,7 +12,13 @@ import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth'
 
-export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+export function LoginForm({ 
+  className, 
+  setShowSignup,
+  ...props 
+}: React.ComponentPropsWithoutRef<'div'> & { 
+  setShowSignup: (show: boolean) => void 
+}) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +47,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription className="text-zinc-400">Enter your email below to login to your account</CardDescription>
+          <CardDescription className="text-zinc-400">
+            <Button
+              variant="link"
+              className="text-zinc-400 hover:text-zinc-200 p-0 h-auto"
+              onClick={() => setShowSignup(true)}
+            >
+              Don't have an account? Sign up
+            </Button>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
@@ -51,7 +65,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="you@example.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

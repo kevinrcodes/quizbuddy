@@ -14,7 +14,13 @@ import { useAuth } from '@/contexts/auth'
 
 // similar to LoginForm.tsx, we're using supabase's auth functions directly,
 // and not the abstrcated helper methods. 
-export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+export function SignupForm({ 
+  className, 
+  setShowSignup,
+  ...props 
+}: React.ComponentPropsWithoutRef<'div'> & { 
+  setShowSignup: (show: boolean) => void 
+}) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
@@ -49,21 +55,32 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       {success ? (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-            <CardDescription className="text-zinc-400">Check your email to confirm</CardDescription>
+            <CardTitle className="text-2xl">Almost done!</CardTitle>
+            <CardDescription className="text-zinc-400">Check your email to verify your account before logging in. It may take a minute!</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400">
-              You've successfully signed up. Please check your email to confirm your account before
-              signing in.
-            </p>
+            <Button
+              variant="link"
+              className="text-zinc-400 hover:text-zinc-200 p-0 h-auto"
+              onClick={() => setShowSignup(false)}
+            >
+              Back to sign in
+            </Button>
           </CardContent>
         </Card>
       ) : (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-2xl">Sign up</CardTitle>
-            <CardDescription className="text-zinc-400">Create a new account</CardDescription>
+            <CardTitle className="text-2xl">Create Account</CardTitle>
+            <CardDescription className="text-zinc-400">
+              <Button
+                variant="link"
+                className="text-zinc-400 hover:text-zinc-200 p-0 h-auto"
+                onClick={() => setShowSignup(false)}
+              >
+                Already have an account? Sign in
+              </Button>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
@@ -73,7 +90,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="you@example.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

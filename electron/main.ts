@@ -212,7 +212,7 @@ async function createWindow(): Promise<void> {
     width: 800,
     height: 600,
     minWidth: 750,
-    minHeight: 550,
+    minHeight: 100,  // Lower minimum height to allow more flexibility
     x: state.currentX,
     y: 50,
     alwaysOnTop: true,
