@@ -52,3 +52,16 @@ export const getSession = async () => {
   const { data: { session }, error } = await supabase.auth.getSession()
   return { session, error }
 }
+
+export const resetPassword = async (email: string) => {
+  // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'http://localhost:3000/update-password',
+  })
+  return { error }
+}
+
+export const updatePassword = async (password: string) => {
+  const { error } = await supabase.auth.updateUser({ password })
+  return { error }
+}

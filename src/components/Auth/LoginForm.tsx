@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth'
+import { ForgotPasswordForm } from '@/components/Auth/ForgotPasswordForm'
 
 export function LoginForm({ 
   className, 
@@ -23,6 +24,7 @@ export function LoginForm({
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   const { signIn } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -40,6 +42,23 @@ export function LoginForm({
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (showForgotPassword) {
+    return (
+      <div className={cn('flex flex-col gap-6 bg-zinc-900 text-zinc-100', className)} {...props}>
+        <ForgotPasswordForm />
+        <div className="text-center">
+          <Button
+            variant="link"
+            className="text-zinc-400 hover:text-zinc-200"
+            onClick={() => setShowForgotPassword(false)}
+          >
+            Back to login
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -75,12 +94,13 @@ export function LoginForm({
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-zinc-300">Password</Label>
-                  <a
-                    href="/forgot-password"
-                    className="ml-auto inline-block text-sm text-zinc-400 underline-offset-4 hover:text-zinc-200 hover:underline"
+                  <Button
+                    variant="link"
+                    className="ml-auto text-sm text-zinc-400 hover:text-zinc-200 p-0 h-auto"
+                    onClick={() => setShowForgotPassword(true)}
                   >
                     Forgot your password?
-                  </a>
+                  </Button>
                 </div>
                 <Input
                   id="password"

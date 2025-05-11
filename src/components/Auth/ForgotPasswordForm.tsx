@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -11,24 +10,22 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/auth'
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { resetPassword } = useAuth()
 
   const handleForgotPassword = async (e: React.FormEvent) => {
-    const supabase = createClient()
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'http://localhost:3000/update-password',
-      })
+      const { error } = await resetPassword(email)
       if (error) throw error
       setSuccess(true)
     } catch (error: unknown) {
@@ -39,25 +36,25 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn('flex flex-col gap-6 bg-zinc-900 text-zinc-100', className)} {...props}>
       {success ? (
-        <Card>
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
+            <CardDescription className="text-zinc-400">Password reset instructions sent</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-zinc-400">
               If you registered using your email and password, you will receive a password reset
               email.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-zinc-400">
               Type in your email and we&apos;ll send you a link to reset your password
             </CardDescription>
           </CardHeader>
@@ -65,7 +62,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
             <form onSubmit={handleForgotPassword}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-zinc-300">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -73,18 +70,13 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="bg-zinc-800 text-zinc-100 border-zinc-700 focus:border-zinc-600"
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Sending...' : 'Send reset email'}
                 </Button>
-              </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{' '}
-                <a href="/login" className="underline underline-offset-4">
-                  Login
-                </a>
               </div>
             </form>
           </CardContent>
