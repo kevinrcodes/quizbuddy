@@ -55,8 +55,8 @@ export function SignupForm({
       {success ? (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-2xl">Almost done!</CardTitle>
-            <CardDescription className="text-zinc-400">Check your email to verify your account before logging in. It may take a minute!</CardDescription>
+            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardDescription className="text-zinc-400">Please verify your account before logging in. The email will arrive in a few seconds.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button

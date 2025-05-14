@@ -95,6 +95,7 @@ export function LoginForm({
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-zinc-300">Password</Label>
                   <Button
+                    type="button"
                     variant="link"
                     className="ml-auto text-sm text-zinc-400 hover:text-zinc-200 p-0 h-auto"
                     onClick={() => setShowForgotPassword(true)}
