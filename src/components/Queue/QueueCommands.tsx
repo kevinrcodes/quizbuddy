@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
+import { useAuth } from "../../contexts/auth"
 
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
@@ -22,6 +23,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+  const { signOut } = useAuth()
 
   useEffect(() => {
     let tooltipHeight = 0
@@ -30,29 +32,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
     }
     onTooltipVisibilityChange(isTooltipVisible, tooltipHeight)
   }, [isTooltipVisible])
-
-  const handleSignOut = async () => {
-    try {
-      // Clear any local storage or electron-specific data
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Clear the API key in the configuration
-      await window.electronAPI.updateConfig({
-        apiKey: '',
-      });
-      
-      showToast('Success', 'Logged out successfully', 'success');
-      
-      // Reload the app after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } catch (err) {
-      console.error("Error logging out:", err);
-      showToast('Error', 'Failed to log out', 'error');
-    }
-  }
 
   const handleMouseEnter = () => {
     setIsTooltipVisible(true)
@@ -379,13 +358,13 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
 
                     {/* Separator and Log Out */}
                     <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
+                      {/* <LanguageSelector  not needed for the quiz solver
                         currentLanguage={currentLanguage}
                         setLanguage={setLanguage}
-                      />
+                      /> */}
 
                       {/* API Key Settings */}
-                      <div className="mb-3 px-2 space-y-1">
+                      {/* <div className="mb-3 px-2 space-y-1">
                         <div className="flex items-center justify-between text-[13px] font-medium text-white/90">
                           <span>OpenAI API Settings</span>
                           <button
@@ -395,10 +374,10 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                             Settings
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       <button
-                        onClick={handleSignOut}
+                        onClick={() => signOut()}
                         className="flex items-center gap-2 text-[11px] text-red-400 hover:text-red-300 transition-colors w-full"
                       >
                         <div className="w-4 h-4 flex items-center justify-center">

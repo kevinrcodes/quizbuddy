@@ -35,7 +35,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <div className="flex items-center justify-between text-[13px] font-medium text-white/90">
         <span>Language</span>
         <select
-          value={currentLanguage}
+          value={currentLanguage} // TODO make the dropdown correctly show previously selected language
           onChange={handleLanguageChange}
           className="bg-black/80 text-white/90 rounded px-2 py-1 text-sm outline-none border border-white/10 focus:border-white/20"
           style={{ WebkitAppearance: 'menulist' }}

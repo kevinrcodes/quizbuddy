@@ -12,6 +12,38 @@ import Debug from "./Debug"
 import { useToast } from "../contexts/toast"
 import { COMMAND_KEY } from "../utils/platform"
 
+// Types for our data structures
+interface SolutionData {
+  answer: string;
+  explanation: string;
+  analysis: string[];
+  time_complexity?: string;
+  space_complexity?: string;
+}
+
+interface ScreenshotData {
+  path: string;
+  preview: string;
+}
+
+// Helper function to format content with code blocks
+const formatContent = (text: string) => {
+  // Split text by backticks
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      // This is a code block, just use monospace font
+      const code = part.slice(1, -1); // Remove backticks
+      return (
+        <span key={index} style={{ fontFamily: 'monospace' }}>
+          {code}
+        </span>
+      );
+    }
+    return part;
+  });
+};
+
 export const ContentSection = ({
   title,
   content,
@@ -20,24 +52,27 @@ export const ContentSection = ({
   title: string
   content: React.ReactNode
   isLoading: boolean
-}) => (
-  <div className="space-y-2">
-    <h2 className="text-[13px] font-medium text-white tracking-wide">
-      {title}
-    </h2>
-    {isLoading ? (
-      <div className="mt-4 flex">
-        <p className="text-xs bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 bg-clip-text text-transparent animate-pulse">
-          Extracting problem statement...
-        </p>
-      </div>
-    ) : (
-      <div className="text-[13px] leading-[1.4] text-gray-100 max-w-[600px]">
-        {content}
-      </div>
-    )}
-  </div>
-)
+}) => {
+  return (
+    <div className="space-y-2">
+      <h2 className="text-[13px] font-medium text-white tracking-wide">
+        {title}
+      </h2>
+      {isLoading ? (
+        <div className="mt-4 flex">
+          <p className="text-xs bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 bg-clip-text text-transparent animate-pulse">
+            Extracting problem statement...
+          </p>
+        </div>
+      ) : (
+        <div className="text-[13px] leading-[1.4] text-gray-100 max-w-[600px]">
+          {typeof content === 'string' ? formatContent(content) : content}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const SolutionSection = ({
   title,
   content,
@@ -160,8 +195,9 @@ const Solutions: React.FC<SolutionsProps> = ({
   const [debugProcessing, setDebugProcessing] = useState(false)
   const [problemStatementData, setProblemStatementData] =
     useState<ProblemStatementData | null>(null)
-  const [solutionData, setSolutionData] = useState<string | null>(null)
-  const [thoughtsData, setThoughtsData] = useState<string[] | null>(null)
+  const [answerData, setAnswerData] = useState<string | null>(null)
+  const [explanationData, setExplanationData] = useState<string | null>(null)
+  const [analysisData, setAnalysisData] = useState<string[] | null>(null)
   const [timeComplexityData, setTimeComplexityData] = useState<string | null>(
     null
   )
@@ -205,7 +241,7 @@ const Solutions: React.FC<SolutionsProps> = ({
     }
 
     fetchScreenshots()
-  }, [solutionData])
+  }, [answerData])
 
   const { showToast } = useToast()
 
@@ -272,12 +308,13 @@ const Solutions: React.FC<SolutionsProps> = ({
       }),
       window.electronAPI.onSolutionStart(() => {
         // Every time processing starts, reset relevant states
-        setSolutionData(null)
-        setThoughtsData(null)
+        setAnswerData(null)
+        setExplanationData(null)
+        setAnalysisData(null)
         setTimeComplexityData(null)
         setSpaceComplexityData(null)
       }),
-      window.electronAPI.onProblemExtracted((data) => {
+      window.electronAPI.onProblemExtracted((data: ProblemStatementData) => {
         queryClient.setQueryData(["problem_statement"], data)
       }),
       //if there was an error processing the initial solution
@@ -285,51 +322,50 @@ const Solutions: React.FC<SolutionsProps> = ({
         showToast("Processing Failed", error, "error")
         // Reset solutions in the cache (even though this shouldn't ever happen) and complexities to previous states
         const solution = queryClient.getQueryData(["solution"]) as {
-          code: string
-          thoughts: string[]
+          answer: string
+          explanation: string
+          analysis: string[]
           time_complexity: string
           space_complexity: string
         } | null
         if (!solution) {
           setView("queue")
         }
-        setSolutionData(solution?.code || null)
-        setThoughtsData(solution?.thoughts || null)
+        setAnswerData(solution?.answer || null)
+        setExplanationData(solution?.explanation || null)
+        setAnalysisData(solution?.analysis || null)
         setTimeComplexityData(solution?.time_complexity || null)
         setSpaceComplexityData(solution?.space_complexity || null)
         console.error("Processing error:", error)
       }),
       //when the initial solution is generated, we'll set the solution data to that
-      window.electronAPI.onSolutionSuccess((data) => {
+      window.electronAPI.onSolutionSuccess((data: SolutionData) => {
         if (!data) {
           console.warn("Received empty or invalid solution data")
           return
         }
         console.log({ data })
         const solutionData = {
-          code: data.code,
-          thoughts: data.thoughts,
-          time_complexity: data.time_complexity,
-          space_complexity: data.space_complexity
+          answer: data.answer,
+          explanation: data.explanation,
+          analysis: data.analysis
         }
 
         queryClient.setQueryData(["solution"], solutionData)
-        setSolutionData(solutionData.code || null)
-        setThoughtsData(solutionData.thoughts || null)
-        setTimeComplexityData(solutionData.time_complexity || null)
-        setSpaceComplexityData(solutionData.space_complexity || null)
+        setAnswerData(solutionData.answer || null)
+        setExplanationData(solutionData.explanation || null)
+        setAnalysisData(solutionData.analysis || null)
 
         // Fetch latest screenshots when solution is successful
         const fetchScreenshots = async () => {
           try {
             const existing = await window.electronAPI.getScreenshots()
-            const screenshots =
-              existing.previews?.map((p) => ({
-                id: p.path,
-                path: p.path,
-                preview: p.preview,
-                timestamp: Date.now()
-              })) || []
+            const screenshots = existing.previews?.map((p: ScreenshotData) => ({
+              id: p.path,
+              path: p.path,
+              preview: p.preview,
+              timestamp: Date.now()
+            })) || []
             setExtraScreenshots(screenshots)
           } catch (error) {
             console.error("Error loading extra screenshots:", error)
@@ -347,7 +383,7 @@ const Solutions: React.FC<SolutionsProps> = ({
         setDebugProcessing(true)
       }),
       //the first time debugging works, we'll set the view to debug and populate the cache with the data
-      window.electronAPI.onDebugSuccess((data) => {
+      window.electronAPI.onDebugSuccess((data: SolutionData) => {
         queryClient.setQueryData(["new_solution"], data)
         setDebugProcessing(false)
       }),
@@ -380,7 +416,7 @@ const Solutions: React.FC<SolutionsProps> = ({
     setProblemStatementData(
       queryClient.getQueryData(["problem_statement"]) || null
     )
-    setSolutionData(queryClient.getQueryData(["solution"]) || null)
+    setAnswerData(queryClient.getQueryData(["solution"]) || null)
 
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event?.query.queryKey[0] === "problem_statement") {
@@ -390,14 +426,16 @@ const Solutions: React.FC<SolutionsProps> = ({
       }
       if (event?.query.queryKey[0] === "solution") {
         const solution = queryClient.getQueryData(["solution"]) as {
-          code: string
-          thoughts: string[]
+          answer: string
+          explanation: string
+          analysis: string[]
           time_complexity: string
           space_complexity: string
         } | null
 
-        setSolutionData(solution?.code ?? null)
-        setThoughtsData(solution?.thoughts ?? null)
+        setAnswerData(solution?.answer ?? null)
+        setExplanationData(solution?.explanation ?? null)
+        setAnalysisData(solution?.analysis ?? null)
         setTimeComplexityData(solution?.time_complexity ?? null)
         setSpaceComplexityData(solution?.space_complexity ?? null)
       }
@@ -453,7 +491,7 @@ const Solutions: React.FC<SolutionsProps> = ({
         <div ref={contentRef} className="relative">
           <div className="space-y-3 px-4 py-3">
           {/* Conditionally render the screenshot queue if solutionData is available */}
-          {solutionData && (
+          {answerData && (
             <div className="bg-transparent w-fit">
               <div className="pb-3">
                 <div className="space-y-3 w-fit">
@@ -470,7 +508,7 @@ const Solutions: React.FC<SolutionsProps> = ({
           {/* Navbar of commands with the SolutionsHelper */}
           <SolutionCommands
             onTooltipVisibilityChange={handleTooltipVisibilityChange}
-            isProcessing={!problemStatementData || !solutionData}
+            isProcessing={!problemStatementData || !answerData}
             extraScreenshots={extraScreenshots}
             credits={credits}
             currentLanguage={currentLanguage}
@@ -481,7 +519,7 @@ const Solutions: React.FC<SolutionsProps> = ({
           <div className="w-full text-sm text-black bg-black/60 rounded-md">
             <div className="rounded-lg overflow-hidden">
               <div className="px-4 py-3 space-y-4 max-w-full">
-                {!solutionData && (
+                {!answerData && (
                   <>
                     <ContentSection
                       title="Problem Statement"
@@ -498,41 +536,30 @@ const Solutions: React.FC<SolutionsProps> = ({
                   </>
                 )}
 
-                {solutionData && (
+                {answerData && (
                   <>
                     <ContentSection
-                      title={`My Thoughts (${COMMAND_KEY} + Arrow keys to scroll)`}
+                      title={`The correct answer is ${answerData}`}
+                      content={explanationData}
+                      isLoading={!explanationData}
+                    />
+                    <ContentSection
+                      title="Other Options"
                       content={
-                        thoughtsData && (
+                        analysisData && (
                           <div className="space-y-3">
                             <div className="space-y-1">
-                              {thoughtsData.map((thought, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
+                              {analysisData.map((analysis, index) => (
+                                <div key={index} className="flex items-start gap-2">
                                   <div className="w-1 h-1 rounded-full bg-blue-400/80 mt-2 shrink-0" />
-                                  <div>{thought}</div>
+                                  <div>{formatContent(analysis)}</div>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )
                       }
-                      isLoading={!thoughtsData}
-                    />
-
-                    <SolutionSection
-                      title="Solution"
-                      content={solutionData}
-                      isLoading={!solutionData}
-                      currentLanguage={currentLanguage}
-                    />
-
-                    <ComplexitySection
-                      timeComplexity={timeComplexityData}
-                      spaceComplexity={spaceComplexityData}
-                      isLoading={!timeComplexityData || !spaceComplexityData}
+                      isLoading={!analysisData}
                     />
                   </>
                 )}

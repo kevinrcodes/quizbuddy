@@ -176,14 +176,16 @@ if (process.defaultApp && process.argv.length >= 2) {
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
+  console.log('Another instance is already running, quitting...')
   app.quit()
 } else {
   app.on("second-instance", (event, commandLine) => {
+    console.log('Second instance detected, focusing existing window...')
     // Someone tried to run a second instance, we should focus our window.
     if (state.mainWindow) {
       if (state.mainWindow.isMinimized()) state.mainWindow.restore()
       state.mainWindow.focus()
-
+      
       // Protocol handler removed - no longer using auth callbacks
     }
   })
@@ -210,7 +212,7 @@ async function createWindow(): Promise<void> {
     width: 800,
     height: 600,
     minWidth: 750,
-    minHeight: 550,
+    minHeight: 100,  // Lower minimum height to allow more flexibility
     x: state.currentX,
     y: 50,
     alwaysOnTop: true,
@@ -426,11 +428,31 @@ function toggleMainWindow(): void {
 // Window movement functions
 function moveWindowHorizontal(updateFn: (x: number) => number): void {
   if (!state.mainWindow) return
-  state.currentX = updateFn(state.currentX)
-  state.mainWindow.setPosition(
-    Math.round(state.currentX),
-    Math.round(state.currentY)
-  )
+
+  const newX = updateFn(state.currentX)
+  // Allow window to go 2/3 off screen in either direction
+  const maxLeftLimit = (-(state.windowSize?.width || 0) * 2) / 3
+  const maxRightLimit =
+    state.screenWidth + ((state.windowSize?.width || 0) * 2) / 3
+
+  // Log the current state and limits
+  console.log({
+    newX,
+    maxLeftLimit,
+    maxRightLimit,
+    screenWidth: state.screenWidth,
+    windowWidth: state.windowSize?.width,
+    currentX: state.currentX
+  })
+
+  // Only update if within bounds
+  if (newX >= maxLeftLimit && newX <= maxRightLimit) {
+    state.currentX = newX
+    state.mainWindow.setPosition(
+      Math.round(state.currentX),
+      Math.round(state.currentY)
+    )
+  }
 }
 
 function moveWindowVertical(updateFn: (y: number) => number): void {
@@ -441,8 +463,6 @@ function moveWindowVertical(updateFn: (y: number) => number): void {
   const maxUpLimit = (-(state.windowSize?.height || 0) * 2) / 3
   const maxDownLimit =
     state.screenHeight + ((state.windowSize?.height || 0) * 2) / 3
-
-  // Log the current state and limits
   console.log({
     newY,
     maxUpLimit,
@@ -451,8 +471,6 @@ function moveWindowVertical(updateFn: (y: number) => number): void {
     windowHeight: state.windowSize?.height,
     currentY: state.currentY
   })
-
-  // Only update if within bounds
   if (newY >= maxUpLimit && newY <= maxDownLimit) {
     state.currentY = newY
     state.mainWindow.setPosition(

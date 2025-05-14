@@ -18,11 +18,12 @@ interface Config {
 export class ConfigHelper extends EventEmitter {
   private configPath: string;
   private defaultConfig: Config = {
-    apiKey: "",
-    apiProvider: "gemini", // Default to Gemini
-    extractionModel: "gemini-2.0-flash", // Default to Flash for faster responses
-    solutionModel: "gemini-2.0-flash",
-    debuggingModel: "gemini-2.0-flash",
+    // TODO add some encryptions later
+    apiKey: "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",
+    apiProvider: "openai",
+    extractionModel: "gpt-4o",
+    solutionModel: "gpt-4o",
+    debuggingModel: "gpt-4o",
     language: "python",
     opacity: 1.0
   };
@@ -80,35 +81,21 @@ export class ConfigHelper extends EventEmitter {
 
   public loadConfig(): Config {
     try {
+      // Always start with our default config that has the hardcoded API key
+      let config = { ...this.defaultConfig };
+      
+      // Only load other settings from the file if it exists
       if (fs.existsSync(this.configPath)) {
         const configData = fs.readFileSync(this.configPath, 'utf8');
-        const config = JSON.parse(configData);
+        const fileConfig = JSON.parse(configData);
         
-        // Ensure apiProvider is a valid value
-        if (config.apiProvider !== "openai" && config.apiProvider !== "gemini") {
-          config.apiProvider = "gemini"; // Default to Gemini if invalid
-        }
-        
-        // Sanitize model selections to ensure only allowed models are used
-        if (config.extractionModel) {
-          config.extractionModel = this.sanitizeModelSelection(config.extractionModel, config.apiProvider);
-        }
-        if (config.solutionModel) {
-          config.solutionModel = this.sanitizeModelSelection(config.solutionModel, config.apiProvider);
-        }
-        if (config.debuggingModel) {
-          config.debuggingModel = this.sanitizeModelSelection(config.debuggingModel, config.apiProvider);
-        }
-        
-        return {
-          ...this.defaultConfig,
-          ...config
-        };
+        // Merge file config with our default, but never override the API key
+        config.language = fileConfig.language || config.language;
+        config.opacity = fileConfig.opacity || config.opacity;
       }
-      
-      // If no config exists, create a default one
-      this.saveConfig(this.defaultConfig);
-      return this.defaultConfig;
+      // we don't need to verify the model or anything because it's hardcoded
+      console.log("Loaded config:", config);
+      return config;
     } catch (err) {
       console.error("Error loading config:", err);
       return this.defaultConfig;
@@ -126,6 +113,7 @@ export class ConfigHelper extends EventEmitter {
         fs.mkdirSync(configDir, { recursive: true });
       }
       // Write the config file
+      console.log("Saving config:", config);
       fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2));
     } catch (err) {
       console.error("Error saving config:", err);
@@ -135,62 +123,25 @@ export class ConfigHelper extends EventEmitter {
   /**
    * Update specific configuration values
    */
-  public updateConfig(updates: Partial<Config>): Config {
+  public updateConfig(updates: Partial<Config>): Config { // TODO figure out how this fits in
     try {
       const currentConfig = this.loadConfig();
-      let provider = updates.apiProvider || currentConfig.apiProvider;
+
+      // key or provider cannot change as of now, so that's been removed
       
-      // Auto-detect provider based on API key format if a new key is provided
-      if (updates.apiKey && !updates.apiProvider) {
-        // If API key starts with "sk-", it's likely an OpenAI key
-        if (updates.apiKey.trim().startsWith('sk-')) {
-          provider = "openai";
-          console.log("Auto-detected OpenAI API key format");
-        } else {
-          provider = "gemini";
-          console.log("Using Gemini API key format (default)");
-        }
-        
-        // Update the provider in the updates object
-        updates.apiProvider = provider;
+      if (updates.language !== undefined) {
+        currentConfig.language = updates.language;
+      }
+      if (updates.opacity !== undefined) { // idk how the user is supposed to change opacity but ok we'll leave this here
+        currentConfig.opacity = updates.opacity;
       }
       
-      // If provider is changing, reset models to the default for that provider
-      if (updates.apiProvider && updates.apiProvider !== currentConfig.apiProvider) {
-        if (updates.apiProvider === "openai") {
-          updates.extractionModel = "gpt-4o";
-          updates.solutionModel = "gpt-4o";
-          updates.debuggingModel = "gpt-4o";
-        } else {
-          updates.extractionModel = "gemini-2.0-flash";
-          updates.solutionModel = "gemini-2.0-flash";
-          updates.debuggingModel = "gemini-2.0-flash";
-        }
-      }
+      this.saveConfig(currentConfig);
+
+      this.emit('config-updated', currentConfig);
+      console.log("Updated config:", currentConfig);
       
-      // Sanitize model selections in the updates
-      if (updates.extractionModel) {
-        updates.extractionModel = this.sanitizeModelSelection(updates.extractionModel, provider);
-      }
-      if (updates.solutionModel) {
-        updates.solutionModel = this.sanitizeModelSelection(updates.solutionModel, provider);
-      }
-      if (updates.debuggingModel) {
-        updates.debuggingModel = this.sanitizeModelSelection(updates.debuggingModel, provider);
-      }
-      
-      const newConfig = { ...currentConfig, ...updates };
-      this.saveConfig(newConfig);
-      
-      // Only emit update event for changes other than opacity
-      // This prevents re-initializing the AI client when only opacity changes
-      if (updates.apiKey !== undefined || updates.apiProvider !== undefined || 
-          updates.extractionModel !== undefined || updates.solutionModel !== undefined || 
-          updates.debuggingModel !== undefined || updates.language !== undefined) {
-        this.emit('config-updated', newConfig);
-      }
-      
-      return newConfig;
+      return currentConfig;
     } catch (error) {
       console.error('Error updating config:', error);
       return this.defaultConfig;
@@ -201,32 +152,14 @@ export class ConfigHelper extends EventEmitter {
    * Check if the API key is configured
    */
   public hasApiKey(): boolean {
-    const config = this.loadConfig();
-    return !!config.apiKey && config.apiKey.trim().length > 0;
+    return true; // Always return true since we're using a hardcoded key
   }
   
   /**
    * Validate the API key format
    */
   public isValidApiKeyFormat(apiKey: string, provider?: "openai" | "gemini"): boolean {
-    // If provider is not specified, attempt to auto-detect
-    if (!provider) {
-      if (apiKey.trim().startsWith('sk-')) {
-        provider = "openai";
-      } else {
-        provider = "gemini";
-      }
-    }
-    
-    if (provider === "openai") {
-      // Basic format validation for OpenAI API keys
-      return /^sk-[a-zA-Z0-9]{32,}$/.test(apiKey.trim());
-    } else if (provider === "gemini") {
-      // Basic format validation for Gemini API keys (usually alphanumeric with no specific prefix)
-      return apiKey.trim().length >= 10; // Assuming Gemini keys are at least 10 chars
-    }
-    
-    return false;
+    return true; // Skip validation since we're using a hardcoded key
   }
   
   /**
@@ -265,24 +198,7 @@ export class ConfigHelper extends EventEmitter {
    * Test API key with the selected provider
    */
   public async testApiKey(apiKey: string, provider?: "openai" | "gemini"): Promise<{valid: boolean, error?: string}> {
-    // Auto-detect provider based on key format if not specified
-    if (!provider) {
-      if (apiKey.trim().startsWith('sk-')) {
-        provider = "openai";
-        console.log("Auto-detected OpenAI API key format for testing");
-      } else {
-        provider = "gemini";
-        console.log("Using Gemini API key format for testing (default)");
-      }
-    }
-    
-    if (provider === "openai") {
-      return this.testOpenAIKey(apiKey);
-    } else if (provider === "gemini") {
-      return this.testGeminiKey(apiKey);
-    }
-    
-    return { valid: false, error: "Unknown API provider" };
+    return { valid: true }; // Skip testing since we're using a hardcoded key
   }
   
   /**

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { Screenshot } from "../../types/screenshots"
-import { supabase } from "../../lib/supabase"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
+import { useAuth } from "../../contexts/auth"
 
 export interface SolutionCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
@@ -13,20 +13,6 @@ export interface SolutionCommandsProps {
   credits: number
   currentLanguage: string
   setLanguage: (language: string) => void
-}
-
-const handleSignOut = async () => {
-  try {
-    // Clear any local storage or electron-specific data first
-    localStorage.clear()
-    sessionStorage.clear()
-
-    // Then sign out from Supabase
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  } catch (err) {
-    console.error("Error signing out:", err)
-  }
 }
 
 const SolutionCommands: React.FC<SolutionCommandsProps> = ({
@@ -40,6 +26,22 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+  const { signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    try {
+      // Clear any local storage or electron-specific data first
+      localStorage.clear()
+      sessionStorage.clear()
+
+      // Then sign out using auth context
+      const { error } = await signOut()
+      if (error) throw error
+    } catch (err) {
+      console.error("Error signing out:", err)
+      showToast("Error", "Failed to sign out", "error")
+    }
+  }
 
   useEffect(() => {
     if (onTooltipVisibilityChange) {
@@ -91,7 +93,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
           </div>
 
           {/* Screenshot and Debug commands - Only show if not processing */}
-          {!isProcessing && (
+          {false && !isProcessing && (
             <>
               <div
                 className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
@@ -278,7 +280,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                       </div>
 
                       {/* Screenshot and Debug commands - Only show if not processing */}
-                      {!isProcessing && (
+                      {false &&!isProcessing && (
                         <>
                           <div
                             className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
@@ -411,13 +413,13 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
 
                     {/* Separator and Log Out */}
                     <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
+                      {/* <LanguageSelector
                         currentLanguage={currentLanguage}
                         setLanguage={setLanguage}
-                      />
+                      /> */}
 
                       {/* API Key Settings */}
-                      <div className="mb-3 px-2 space-y-1">
+                      {/* <div className="mb-3 px-2 space-y-1">
                         <div className="flex items-center justify-between text-[13px] font-medium text-white/90">
                           <span>OpenAI API Settings</span>
                           <button
@@ -427,7 +429,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                             Settings
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       <button
                         onClick={handleSignOut}

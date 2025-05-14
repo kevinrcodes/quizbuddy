@@ -61,7 +61,7 @@ export class ProcessingHelper {
     try {
       const config = configHelper.loadConfig();
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         if (config.apiKey) {
           this.openaiClient = new OpenAI({ 
             apiKey: config.apiKey,
@@ -167,7 +167,7 @@ export class ProcessingHelper {
     const config = configHelper.loadConfig();
     
     // First verify we have a valid AI client
-    if (config.apiProvider === "openai" && !this.openaiClient) {
+    if (true || config.apiProvider === "openai" && !this.openaiClient) {
       this.initializeAIClient();
       
       if (!this.openaiClient) {
@@ -447,7 +447,8 @@ export class ProcessingHelper {
 
       let problemInfo;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
+        console.log("Attempting to process screenshots with OpenAI")
         // Verify OpenAI client
         if (!this.openaiClient) {
           this.initializeAIClient(); // Try to reinitialize
@@ -464,14 +465,25 @@ export class ProcessingHelper {
         const messages = [
           {
             role: "system" as const, 
-            content: "You are a coding challenge interpreter. Analyze the screenshot of the coding problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, constraints, example_input, example_output. Just return the structured JSON without any other text."
+            content: `
+You are a quiz question interpreter. Analyze the screenshot of the multiple choice questions and extract all relevant information. 
+There may be more than one question in the screenshot, just focus on the first question you see. 
+
+Return the information in JSON format with these fields: 
+- background_info (any contextual information or background provided before the actual question)
+- problem_statement (the actual question text, without the background info) 
+- options (array of possible multiple choice answers). 
+
+If there is no background information, leave the background_info field as an empty string.
+Just return the structured JSON without any other text.
+`
           },
           {
             role: "user" as const,
             content: [
               {
                 type: "text" as const, 
-                text: `Extract the coding problem details from these screenshots. Return in JSON format. Preferred coding language we gonna use for this problem is ${language}.`
+                text: `Extract the question details from these screenshots.`
               },
               ...imageDataList.map(data => ({
                 type: "image_url" as const,
@@ -480,7 +492,7 @@ export class ProcessingHelper {
             ]
           }
         ];
-
+        console.log("Sending to OpenAI Vision API...")
         // Send to OpenAI Vision API
         const extractionResponse = await this.openaiClient.chat.completions.create({
           model: config.extractionModel || "gpt-4o",
@@ -488,7 +500,7 @@ export class ProcessingHelper {
           max_tokens: 4000,
           temperature: 0.2
         });
-
+        console.log("Received response from OpenAI Vision API")
         // Parse the response
         try {
           const responseText = extractionResponse.choices[0].message.content;
@@ -502,7 +514,9 @@ export class ProcessingHelper {
             error: "Failed to parse problem information. Please try again or use clearer screenshots."
           };
         }
+        console.log("Successfully processed screenshots with OpenAI")
       } else {
+        console.log("Attempting to process screenshots with Gemini")
         // Use Gemini API
         if (!this.geminiApiKey) {
           return {
@@ -659,39 +673,42 @@ export class ProcessingHelper {
           progress: 60
         });
       }
-
+      console.log("creating prompt for ", problemInfo)
       // Create prompt for solution generation
       const promptText = `
-Generate a detailed solution for the following coding problem:
+Analyze the following quiz question, think carefully, and provide the best answer:
 
-PROBLEM STATEMENT:
+${problemInfo.background_info || ""}
+
+QUESTION:
 ${problemInfo.problem_statement}
 
-CONSTRAINTS:
-${problemInfo.constraints || "No specific constraints provided."}
-
-EXAMPLE INPUT:
-${problemInfo.example_input || "No example input provided."}
-
-EXAMPLE OUTPUT:
-${problemInfo.example_output || "No example output provided."}
-
-LANGUAGE: ${language}
+OPTIONS:
+${problemInfo.options.join('\n')}
 
 I need the response in the following format:
-1. Code: A clean, optimized implementation in ${language}
-2. Your Thoughts: A list of key insights and reasoning behind your approach
-3. Time complexity: O(X) with a detailed explanation (at least 2 sentences)
-4. Space complexity: O(X) with a detailed explanation (at least 2 sentences)
+Correct Answer: The letter (A, B, C, D, etc.) corresponding to the best answer, followed by the option text.
+Explanation: [A brief 2-4 sentence explanation of why this is the best answer]
+Incorrect Options:
+- [Option x]: [1-2 sentences explaining why this option is incorrect]
+- [Option y]: [1-2 sentences explaining why this option is incorrect
+- Repeat for all incorrect options
 
-For complexity explanations, please be thorough. For example: "Time complexity: O(n) because we iterate through the array only once. This is optimal as we need to examine each element at least once to find the solution." or "Space complexity: O(n) because in the worst case, we store all elements in the hashmap. The additional space scales linearly with the input size."
+Example, assuming the question is "What is 2+2?" and the options are [1, 2, 3, 4]:
 
-Your solution should be efficient, well-commented, and handle edge cases.
+The correct answer is D: "4"
+Explanation: "The answer is 4 because 2+2=4"
+Incorrect Options:
+- A: "1" is incorrect because...
+- B: "2" is incorrect because...
+- C: "3" is incorrect because...
+
+Note: Only list the incorrect options, not the correct one. Each incorrect option should be on a new line starting with a dash (-).
 `;
 
       let responseContent;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         // OpenAI processing
         if (!this.openaiClient) {
           return {
@@ -704,7 +721,7 @@ Your solution should be efficient, well-commented, and handle edge cases.
         const solutionResponse = await this.openaiClient.chat.completions.create({
           model: config.solutionModel || "gpt-4o",
           messages: [
-            { role: "system", content: "You are an expert coding interview assistant. Provide clear, optimal solutions with detailed explanations." },
+            { role: "system", content: "You are an expert quiz question solver. Provide clear, well-reasoned answers." },
             { role: "user", content: promptText }
           ],
           max_tokens: 4000,
@@ -762,73 +779,24 @@ Your solution should be efficient, well-commented, and handle edge cases.
           };
         }
       }
-      
-      // Extract parts from the response
-      const codeMatch = responseContent.match(/```(?:\w+)?\s*([\s\S]*?)```/);
-      const code = codeMatch ? codeMatch[1].trim() : responseContent;
-      
-      // Extract thoughts, looking for bullet points or numbered lists
-      const thoughtsRegex = /(?:Thoughts:|Key Insights:|Reasoning:|Approach:)([\s\S]*?)(?:Time complexity:|$)/i;
-      const thoughtsMatch = responseContent.match(thoughtsRegex);
-      let thoughts: string[] = [];
-      
-      if (thoughtsMatch && thoughtsMatch[1]) {
-        // Extract bullet points or numbered items
-        const bulletPoints = thoughtsMatch[1].match(/(?:^|\n)\s*(?:[-*•]|\d+\.)\s*(.*)/g);
-        if (bulletPoints) {
-          thoughts = bulletPoints.map(point => 
-            point.replace(/^\s*(?:[-*•]|\d+\.)\s*/, '').trim()
-          ).filter(Boolean);
-        } else {
-          // If no bullet points found, split by newlines and filter empty lines
-          thoughts = thoughtsMatch[1].split('\n')
-            .map(line => line.trim())
-            .filter(Boolean);
-        }
-      }
-      
-      // Extract complexity information
-      const timeComplexityPattern = /Time complexity:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*(?:Space complexity|$))/i;
-      const spaceComplexityPattern = /Space complexity:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*(?:[A-Z]|$))/i;
-      
-      let timeComplexity = "O(n) - Linear time complexity because we only iterate through the array once. Each element is processed exactly one time, and the hashmap lookups are O(1) operations.";
-      let spaceComplexity = "O(n) - Linear space complexity because we store elements in the hashmap. In the worst case, we might need to store all elements before finding the solution pair.";
-      
-      const timeMatch = responseContent.match(timeComplexityPattern);
-      if (timeMatch && timeMatch[1]) {
-        timeComplexity = timeMatch[1].trim();
-        if (!timeComplexity.match(/O\([^)]+\)/i)) {
-          timeComplexity = `O(n) - ${timeComplexity}`;
-        } else if (!timeComplexity.includes('-') && !timeComplexity.includes('because')) {
-          const notationMatch = timeComplexity.match(/O\([^)]+\)/i);
-          if (notationMatch) {
-            const notation = notationMatch[0];
-            const rest = timeComplexity.replace(notation, '').trim();
-            timeComplexity = `${notation} - ${rest}`;
-          }
-        }
-      }
-      
-      const spaceMatch = responseContent.match(spaceComplexityPattern);
-      if (spaceMatch && spaceMatch[1]) {
-        spaceComplexity = spaceMatch[1].trim();
-        if (!spaceComplexity.match(/O\([^)]+\)/i)) {
-          spaceComplexity = `O(n) - ${spaceComplexity}`;
-        } else if (!spaceComplexity.includes('-') && !spaceComplexity.includes('because')) {
-          const notationMatch = spaceComplexity.match(/O\([^)]+\)/i);
-          if (notationMatch) {
-            const notation = notationMatch[0];
-            const rest = spaceComplexity.replace(notation, '').trim();
-            spaceComplexity = `${notation} - ${rest}`;
-          }
-        }
-      }
 
+      // Extract parts from the response
+      const correctAnswerMatch = responseContent.match(/Correct Answer:?\s*([^\n]+)/i);
+      const explanationMatch = responseContent.match(/Explanation:?\s*([^\n]+(?:\n[^\n]+)*?)(?=\n\s*(?:Incorrect Options|$))/i);
+      const incorrectOptionsMatch = responseContent.match(/Incorrect Options:?\s*([\s\S]+)$/i);
+      
+      console.log("correct answer obtained: ", correctAnswerMatch ? correctAnswerMatch[1].trim() : "Answer not found")
+      console.log("explanation obtained: ", explanationMatch ? explanationMatch[1].trim() : "No explanation provided")
+      
       const formattedResponse = {
-        code: code,
-        thoughts: thoughts.length > 0 ? thoughts : ["Solution approach based on efficiency and readability"],
-        time_complexity: timeComplexity,
-        space_complexity: spaceComplexity
+        answer: correctAnswerMatch ? correctAnswerMatch[1].trim() : "Answer not found",
+        explanation: explanationMatch ? explanationMatch[1].trim() : "No explanation provided",
+        analysis: incorrectOptionsMatch ? 
+          incorrectOptionsMatch[1]
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.startsWith('-'))
+            .map(line => line.substring(1).trim()) : []
       };
 
       return { success: true, data: formattedResponse };
@@ -884,7 +852,7 @@ Your solution should be efficient, well-commented, and handle edge cases.
       
       let debugContent;
       
-      if (config.apiProvider === "openai") {
+      if (true || config.apiProvider === "openai") {
         if (!this.openaiClient) {
           return {
             success: false,
